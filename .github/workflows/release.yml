@@ -19,6 +19,7 @@ name: Publish to Plugin Marketplace
 on:
   release:
     types: [published]
+  workflow_dispatch: {}   # manual fallback if a release event ever does not fire
 permissions:
   contents: read
   id-token: write     # OIDC token: proves which repo/workflow this run is
