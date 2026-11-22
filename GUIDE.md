@@ -11,8 +11,9 @@ Assumed layout (the one `docs/src/content/docs/install-from-a-release.md` in
 systemctl unit: prusa-connect.service
 ```
 
-API base: `http://<server>:8080/api/v1` (bearer token; mint one in the web UI
-under Settings, or `POST /api/v1/auth/credentials`).
+API base: `http://<server>:<port>/api/v1` — the port your server listens on
+(default 8080; some installs use another). Bearer token: mint one in
+the web UI under Settings, or `POST /api/v1/auth/credentials`.
 
 ---
 
@@ -154,15 +155,16 @@ The module's routes are mounted at
 
 ```sh
 TOKEN=...   # bearer token
+PORT=8080    # the port your server listens on
 M=/api/v1/modules/com.github.aux.philip-soerensen.connect-local-timelapse
-curl -H "Authorization: Bearer $TOKEN" "http://127.0.0.1:8080$M/status"
-curl -H "Authorization: Bearer $TOKEN" "http://127.0.0.1:8080$M/timelapses"
+curl -H "Authorization: Bearer $TOKEN" "http://127.0.0.1:$PORT$M/status"
+curl -H "Authorization: Bearer $TOKEN" "http://127.0.0.1:$PORT$M/timelapses"
 # ready events on the stream:
 curl -N -H "Authorization: Bearer $TOKEN" \
-  "http://127.0.0.1:8080/api/v1/events?types=com.github.aux.philip-soerensen.connect-local-timelapse/timelapse.ready"
+  "http://127.0.0.1:$PORT/api/v1/events?types=com.github.aux.philip-soerensen.connect-local-timelapse/timelapse.ready"
 # a video plays over ranged requests (one module answer carries at most 1 MiB):
 curl -H "Authorization: Bearer $TOKEN" -H "Range: bytes=0-524287" \
-  "http://127.0.0.1:8080$M/timelapses/<id>/video" -o chunk.bin -D - | head -8
+  "http://127.0.0.1:$PORT$M/timelapses/<id>/video" -o chunk.bin -D - | head -8
 sudo journalctl -u prusa-connect -f | grep -i timelapse
 ```
 
