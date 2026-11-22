@@ -74,3 +74,19 @@ func TestOpenAPIParses(t *testing.T) {
 		t.Fatalf("openapi.json: %v", err)
 	}
 }
+
+// TestManifestSummaryBound: the marketplace refuses module.yaml summaries over
+// 500 characters ("Too big: expected string to have <=500 characters").
+func TestManifestSummaryBound(t *testing.T) {
+	raw, err := os.ReadFile("module.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := manifest.Parse("module.yaml", raw, yaml.Unmarshal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m.Summary) > 500 {
+		t.Errorf("summary is %d characters, the marketplace allows at most 500", len(m.Summary))
+	}
+}
