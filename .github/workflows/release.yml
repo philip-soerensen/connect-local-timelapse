@@ -32,5 +32,5 @@ jobs:
       bundle-command: cd ui && npm ci && npm run build
       bundle-output: ui/dist
       core-ref: main                                 # prusa3d/prusa-connect (public) into .core/
-    environment: release
+      environment: release                           # builder input: env holding PRUSA_CONNECT_EXTENSION_SIGNING_KEY
     secrets: inherit
