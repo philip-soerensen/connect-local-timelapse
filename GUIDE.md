@@ -99,7 +99,7 @@ server is stopped or running):
 
 ```sh
 sudo /var/lib/prusa-connect/bin/prusa-connect \
-  module add github.com/philip-soerensen/connect-local-timelapse@0.3.0 \
+  module add github.com/philip-soerensen/connect-local-timelapse@0.3.1 \
   -config /etc/prusa-connect/config.yaml \
   -from /opt/connect-timelapse-release \
   -approve
@@ -134,7 +134,7 @@ The module's routes are mounted at
   short how-to; everything is configured on the printer's Timelapse tab.
 - Upgrading from 0.1.x: remove a leftover `rtsp_hosts` key from the instance
   config block (Settings → Extensions → Timelapse, or the settings file) —
-  the host refuses a config key the 0.3.0 manifest no longer declares.
+  the host refuses a config key the 0.3.1 manifest no longer declares.
 - **ffmpeg on the server** to assemble the videos: `sudo apt install ffmpeg`.
   (Frames are recorded without it; only the MP4 assembly needs it.)
 - On a printer's page, open the **Timelapse** tab and configure everything

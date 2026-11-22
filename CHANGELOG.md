@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0
+## 0.3.1
 
 - The AI-use warning ("100% vibecoded by Mistral Large 4 …") now shows on the
   Timelapse guide page and in the repository README.
@@ -38,7 +38,7 @@
   (defaults 10 s / 24 fps apply to printers without a saved row). The global
   options left are `enabled`, `video_crf`, `keep_prints`, `max_frame_bytes`.
 
-Upgrade note: if your instance config block still names a key the 0.3.0
+Upgrade note: if your instance config block still names a key the 0.3.1
 manifest no longer declares — `rtsp_hosts`, `frame_interval_seconds`, or
 `video_fps` from 0.1.x — remove it: the host refuses an unknown config key and
 names it in the refusal. The capture interval and video fps now live on each

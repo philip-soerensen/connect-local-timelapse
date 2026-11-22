@@ -9,7 +9,7 @@ name: connect-timelapse
 title: Timelapse
 summary: Records a timelapse video of every print. While a printer prints, one frame per configured interval is saved from the snapshots the Connect server records for the printer's camera (pushed photos, HTTP snapshot_url, or the camera's RTSP stream_url - the server pulls those itself), and when the print ends the frames are assembled into one MP4 with ffmpeg installed on the server. The last few prints are kept; how many is a setting. A "Timelapse" tab on each printer's page picks the camera, sets its stream URL and snapshot cadence, and shows the recordings. The module process itself makes no outbound connections.
 kind: sink
-version: 0.3.0
+version: 0.3.1
 license: MIT
 # The plugin wire major the process half speaks.
 contract_major: 1

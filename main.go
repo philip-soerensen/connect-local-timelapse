@@ -27,7 +27,7 @@ import (
 
 const (
 	name    = "connect-timelapse"
-	release = extension.Version("0.3.0")
+	release = extension.Version("0.3.1")
 )
 
 //go:embed openapi.json

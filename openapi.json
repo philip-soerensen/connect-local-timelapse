@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "connect-timelapse",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "Routes connect-timelapse serves, relative to its mount /api/v1/modules/<namespace>/. Frames are copied from the camera snapshots the Connect server records; file routes answer ranged chunks of at most 512 KiB, because one module answer carries at most 1 MiB."
   },
   "paths": {
