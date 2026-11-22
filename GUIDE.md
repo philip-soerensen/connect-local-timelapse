@@ -12,7 +12,7 @@ systemctl unit: prusa-connect.service
 ```
 
 API base: `http://<server>:<port>/api/v1` — the port your server listens on
-(default 8080; some installs use another). Bearer token: mint one in
+(default 8080; some installs listen on another port). Bearer token: mint one in
 the web UI under Settings, or `POST /api/v1/auth/credentials`.
 
 ---
