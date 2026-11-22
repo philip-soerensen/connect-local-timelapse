@@ -33,4 +33,7 @@ jobs:
       bundle-output: ui/dist
       core-ref: main                                 # prusa3d/prusa-connect (public) into .core/
       environment: release                           # builder input: env holding PRUSA_CONNECT_EXTENSION_SIGNING_KEY
-    secrets: inherit
+    secrets:
+      # Named, not inherit: secrets: inherit does not reach a reusable
+      # workflow in another organisation (prusa3d/prusa-connect-marketplace-publish).
+      PRUSA_CONNECT_EXTENSION_SIGNING_KEY: ${{ secrets.PRUSA_CONNECT_EXTENSION_SIGNING_KEY }}
