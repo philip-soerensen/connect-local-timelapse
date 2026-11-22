@@ -1,0 +1,359 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "connect-timelapse",
+    "version": "0.3.0",
+    "description": "Routes connect-timelapse serves, relative to its mount /api/v1/modules/<namespace>/. Frames are copied from the camera snapshots the Connect server records; file routes answer ranged chunks of at most 512 KiB, because one module answer carries at most 1 MiB."
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "read-health",
+        "summary": "Liveness",
+        "description": "Always answers 200 ok while the module runs.",
+        "responses": {
+          "200": {
+            "description": "The module is up."
+          }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "operationId": "read-status",
+        "summary": "Module state",
+        "description": "Whether the module is enabled, whether ffmpeg was found on the server, the active recordings per printer and how many finished records are kept.",
+        "responses": {
+          "200": {
+            "description": "The state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "ffmpeg": {
+                      "type": "boolean",
+                      "description": "ffmpeg was found on the server; videos are assembled with it."
+                    },
+                    "data_dir": {
+                      "type": "boolean",
+                      "description": "A writable data directory was granted."
+                    },
+                    "recording": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object"
+                      }
+                    },
+                    "sessions_kept": {
+                      "type": "integer"
+                    },
+                    "asked_by": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "operationId": "read-settings",
+        "summary": "Effective settings",
+        "description": "The settings in force: the manifest defaults with the instance's config block over them. The Timelapse tab reads this.",
+        "responses": {
+          "200": {
+            "description": "The settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "video_crf": {
+                      "type": "integer"
+                    },
+                    "keep_prints": {
+                      "type": "integer"
+                    },
+                    "max_frame_bytes": {
+                      "type": "integer"
+                    },
+                    "asked_by": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/config": {
+      "get": {
+        "operationId": "read-config",
+        "summary": "Effective config object",
+        "description": "The same settings as /settings, as one config object, for API users.",
+        "responses": {
+          "200": {
+            "description": "The config.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sources": {
+      "get": {
+        "operationId": "list-sources",
+        "summary": "Per-printer camera inputs",
+        "description": "The camera input configured for each printer, or for one printer with ?printer=<id>.",
+        "responses": {
+          "200": {
+            "description": "The sources.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sources": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object"
+                      }
+                    },
+                    "asked_by": {
+                      "type": "string"
+                    },
+                    "defaults": {
+                      "type": "object",
+                      "description": "Built-in defaults for the per-printer capture settings (frame_interval_seconds, video_fps), used for printers with no saved source row."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "set-source",
+        "summary": "Set the camera input for one printer",
+        "description": "Body: {\"printer\":\"<device-id>\",\"source\":{\"camera\":\"<camera-name>\",\"frame_interval_seconds\":10,\"video_fps\":24}}. frame_interval_seconds and video_fps are this printer's capture settings (0 = the built-in default of 10 s / 24 fps); they are configured only on the Timelapse tab, not in the global settings. The named camera must be one of this printer's cameras; frames are saved from the snapshots the server records for it. An empty camera clears the source. The caller must be allowed to operate the printer.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The source was set."
+          },
+          "400": {
+            "description": "Bad body."
+          },
+          "403": {
+            "description": "The caller may not operate the printer."
+          }
+        }
+      }
+    },
+    "/timelapses": {
+      "get": {
+        "operationId": "list-timelapses",
+        "summary": "Retained timelapse records",
+        "description": "Every retained print record, newest first, or one printer's with ?printer=<id>. Each item carries the state, frame count, outcome and the video_url to play.",
+        "responses": {
+          "200": {
+            "description": "The records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "asked_by": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/timelapses/{id}": {
+      "get": {
+        "operationId": "get-timelapse",
+        "summary": "One timelapse record",
+        "description": "One retained print record by its session id.",
+        "responses": {
+          "200": {
+            "description": "The record.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such record."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-timelapse",
+        "summary": "Delete one timelapse record",
+        "description": "Removes the record, its frames and its video. The host already requires operate_resource on this module's instance for a DELETE; on top of that the caller must be allowed to operate the record's printer. A still-recording print is refused with 409.",
+        "responses": {
+          "200": {
+            "description": "Deleted."
+          },
+          "403": {
+            "description": "The caller may not operate the printer."
+          },
+          "404": {
+            "description": "No such record."
+          },
+          "409": {
+            "description": "The print is still recording."
+          }
+        }
+      }
+    },
+    "/timelapses/{id}/video": {
+      "get": {
+        "operationId": "get-timelapse-video",
+        "summary": "Play the assembled timelapse video",
+        "description": "The MP4 assembled for one print, served with Range support in chunks of at most 512 KiB (one module answer carries at most 1 MiB, so a request without a Range header is answered 416 for a video larger than that; browsers send a Range). Answers 206 with Content-Range for ranged requests, video/mp4.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The session id from /timelapses."
+          },
+          {
+            "name": "Range",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "bytes=start-end, as any HTTP client sends for media."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The whole video (only when it fits one module answer).",
+            "content": {
+              "video/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "One ranged chunk.",
+            "content": {
+              "video/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No video for this record."
+          },
+          "416": {
+            "description": "Range required; the whole file exceeds one module answer."
+          }
+        }
+      }
+    },
+    "/timelapses/{id}/frames/{name}": {
+      "get": {
+        "operationId": "get-timelapse-frame",
+        "summary": "One saved frame",
+        "description": "One JPEG frame of one print, named 000000001.jpg and up, served with the same Range rules as the video.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The session id from /timelapses."
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{9}\\.jpg$"
+            },
+            "description": "The frame file name."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The frame.",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "One ranged chunk."
+          },
+          "400": {
+            "description": "Bad name."
+          },
+          "404": {
+            "description": "No such frame."
+          }
+        }
+      }
+    }
+  }
+}

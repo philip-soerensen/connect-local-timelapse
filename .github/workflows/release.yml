@@ -1,0 +1,35 @@
+# Publishes this extension to the Prusa Plugin Marketplace when a GitHub
+# release is published. The builder (prusa3d/prusa-connect-marketplace-publish)
+# builds the binaries and the UI bundle from this commit, signs checksums.txt
+# with the OIDC token + signing key, and uploads. Human review at the
+# marketplace follows; a pre-release goes to the beta channel.
+#
+# Required setup before the first run (see prusa-connect-marketplace-publish README):
+#   1. RSA signing key pair; register the PUBLIC key in the author console
+#      (plugin-marketplace.prusa3d.com) under "Signing keys".
+#   2. Secret PRUSA_CONNECT_EXTENSION_SIGNING_KEY (the private key) in the
+#      GitHub environment "release".
+#   3. In the author console under "Trusted publishing": extension id
+#      com.github.aux.philip-soerensen.connect-local-timelapse,
+#      repository philip-soerensen/connect-local-timelapse, workflow file
+#      release.yml, environment release.
+#   4. The repository must be PUBLIC when the release runs (build provenance
+#      attestations are recorded for public repositories only).
+name: Publish to Plugin Marketplace
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+  id-token: write     # OIDC token: proves which repo/workflow this run is
+  attestations: write # build provenance attestation
+jobs:
+  publish:
+    uses: prusa3d/prusa-connect-marketplace-publish/.github/workflows/publish.yml@v1
+    with:
+      path: .                                        # this folder: module.yaml, go.mod, ui/
+      bundle-command: cd ui && npm ci && npm run build
+      bundle-output: ui/dist
+      core-ref: main                                 # prusa3d/prusa-connect (public) into .core/
+    environment: release
+    secrets: inherit
